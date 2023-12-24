@@ -1,5 +1,8 @@
+import 'dart:ffi';
+
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_demo/application/providers.dart';
 
 void main() {
   runApp(const ProviderScope(child: MyApp()));
@@ -28,6 +31,7 @@ class MyApp extends HookConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final currentWeather = ref.watch(weatherProvider);
     final date = ref.watch(dateProvider);  //listen to any changes to our provider
     //ref.read(dateProvider);   //read provider value only once
     return MaterialApp(
@@ -72,7 +76,32 @@ class MyApp extends HookConsumerWidget {
                   return Text(
                     ref.watch(counterProvider).toString()
                   );
-                })
+                }),
+                SizedBox(height: 8,),
+                Text('Weather'),
+                currentWeather.when(
+                    data: (data) => Text(data),
+                    error: (error, stackTrace) => Text(''),
+                    loading: () => CircularProgressIndicator()
+                ),
+                SizedBox(height: 8,),
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: City.values.length,
+                    itemBuilder: (context, index){
+                      final currentCity = ref.watch(currentCityProvider);
+                      final isSelected = currentCity==City.values[index];
+                      return ListTile(
+                        onTap: (){
+                          ref.read(currentCityProvider.notifier).state =
+                              City.values[index];
+                        },
+                          title: Text(City.values[index].toString()),
+                        trailing: isSelected ? Icon(Icons.check) : null,
+                      );
+                    },
+                  ),
+                )
               ],
             ),
           ),
