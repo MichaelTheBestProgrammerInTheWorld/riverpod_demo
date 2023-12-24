@@ -5,11 +5,24 @@ void main() {
   runApp(const ProviderScope(child: MyApp()));
 }
 
+class counter extends StateNotifier<int> {
+
+  counter() : super(0);
+
+  void increment(){
+    state = state + 1;
+  }
+}
+
+final counterProvider = StateNotifierProvider<counter, int>((ref) {
+  return counter();
+});
+
 final dateProvider = Provider((ref) {
   return DateTime.now();
 });
 
-class MyApp extends ConsumerWidget {
+class MyApp extends HookConsumerWidget {
   const MyApp({super.key});
 
   // This widget is the root of your application.
@@ -40,6 +53,11 @@ class MyApp extends ConsumerWidget {
       ),
       //home: const MyHomePage(title: 'Flutter Demo Home Page'),
       home: Scaffold(
+        floatingActionButton: FloatingActionButton(onPressed: () {
+          ref.read(counterProvider.notifier).increment();
+        },
+
+        ),
           appBar: AppBar(
             title: Text('Welcome to Riverpod'),
           ),
@@ -49,6 +67,12 @@ class MyApp extends ConsumerWidget {
                 Text('This is my first Riverpod app'),
                 SizedBox(height: 8,),
                 Text(date.toIso8601String()),
+                SizedBox(height: 8,),
+                Consumer(builder: (BuildContext context, WidgetRef ref, Widget? child){
+                  return Text(
+                    ref.watch(counterProvider).toString()
+                  );
+                })
               ],
             ),
           ),
