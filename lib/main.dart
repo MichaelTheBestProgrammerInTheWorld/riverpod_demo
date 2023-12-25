@@ -1,7 +1,9 @@
 import 'dart:ffi';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:riverpod_demo/application/colors_providers.dart';
 import 'package:riverpod_demo/application/providers.dart';
 
 void main() {
@@ -31,6 +33,7 @@ class MyApp extends HookConsumerWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final colors = ref.watch(colorProvider);
     final currentWeather = ref.watch(weatherProvider);
     final date = ref.watch(dateProvider);  //listen to any changes to our provider
     //ref.read(dateProvider);   //read provider value only once
@@ -101,7 +104,29 @@ class MyApp extends HookConsumerWidget {
                       );
                     },
                   ),
-                )
+                ),
+                colors.when(
+                    data: (data){
+                      return Expanded(
+                        child: ListView.builder(
+                          itemBuilder: (context, index) {
+                            return Container(
+                              color: Color((math.Random().nextDouble() * 0xFFFFFF)
+                                  .toInt()).withOpacity(1.0),
+                              child: ListTile(
+                                title: Text(
+                                  data.elementAt(index)
+                                ),
+                              ),
+                            );
+                          },
+                          itemCount: data.length,
+                        ),
+                      );
+                    },
+                    error: (error, stackTrace) => Text('end of the list'),
+                    loading: () => CircularProgressIndicator(),
+                ),
               ],
             ),
           ),
